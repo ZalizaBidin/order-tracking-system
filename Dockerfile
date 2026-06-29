@@ -4,11 +4,13 @@ COPY . /var/www/html
 
 WORKDIR /var/www/html
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-RUN php artisan config:clear
-RUN php artisan route:clear
-RUN php artisan view:clear
+RUN php artisan package:discover --ansi || true
+
+RUN php artisan config:clear || true
+RUN php artisan route:clear || true
+RUN php artisan view:clear || true
 
 RUN chmod -R 775 storage bootstrap/cache
 
