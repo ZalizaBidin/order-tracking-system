@@ -1,17 +1,19 @@
-FROM richarvey/nginx-php-fpm:3.1.6
+FROM webdevops/php-nginx:8.3-alpine
 
-COPY . /var/www/html
+WORKDIR /app
 
-WORKDIR /var/www/html
+COPY . /app
 
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+ENV WEB_DOCUMENT_ROOT=/app/public
+ENV APP_ENV=production
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
 
 RUN php artisan package:discover --ansi || true
-
 RUN php artisan config:clear || true
 RUN php artisan route:clear || true
 RUN php artisan view:clear || true
 
 RUN chmod -R 775 storage bootstrap/cache
 
-ENV WEBROOT=/var/www/html/public
+EXPOSE 80
