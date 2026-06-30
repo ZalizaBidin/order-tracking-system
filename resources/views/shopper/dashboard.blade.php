@@ -93,7 +93,7 @@
                         <td>@include('partials.status-badge', ['status' => $order->status])</td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
                         <td class="text-end">
-                            <a href="{{ route('shopper.orders.show', $order) }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('shopper.orders.show', [encrypt($order)]) }}" class="btn btn-sm btn-primary">
                                 Manage
                             </a>
                         </td>

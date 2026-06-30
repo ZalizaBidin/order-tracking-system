@@ -20,6 +20,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        $order = decrypt($order);
         $order->load(['customer', 'shopper', 'logs.updatedBy']);
 
         return view('shopper.orders.show', compact('order'));
