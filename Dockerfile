@@ -17,3 +17,5 @@ RUN php artisan view:clear || true
 RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 80
+
+CMD php artisan migrate --force || true && /entrypoint supervisord
