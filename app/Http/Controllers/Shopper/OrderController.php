@@ -18,12 +18,49 @@ class OrderController extends Controller
         return view('shopper.orders.index', compact('orders'));
     }
 
-    public function show(Order $order)
+    public function show($id)
     {
-        $order = decrypt($order);
-        $order->load(['customer', 'shopper', 'logs.updatedBy']);
+        $orderId = decrypt($id);
+        $order = Order::with(['customer', 'shopper', 'logs.updatedBy'])->findOrFail($orderId);
 
         return view('shopper.orders.show', compact('order'));
+    }
+
+    public function create()
+    {
+        return view('shopper.orders.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'item_name' => ['required', 'string', 'max:255'],
+            'item_description' => ['nullable', 'string'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'estimated_budget' => ['nullable', 'numeric', 'min:0'],
+            'remarks' => ['nullable', 'string'],
+        ]);
+
+        $order = Order::create([
+            'order_no' => 'ORD-' . now()->format('YmdHis') . '-' . strtoupper(Str::random(4)),
+            'customer_id' => auth()->id(),
+
+            'item_name' => $request->item_name,
+            'item_description' => $request->item_description,
+            'quantity' => $request->quantity,
+            'estimated_budget' => $request->estimated_budget,
+            'status' => 'In Stock',
+        ]);
+
+        OrderStatusLog::create([
+            'order_id' => $order->id,
+            'status' => 'In Stock',
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('shopper.orders.show', ['order' => encrypt($order->id)])
+            ->with('success', 'Stock created successfully.');
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -31,8 +68,6 @@ class OrderController extends Controller
         $request->validate([
             'status' => ['required', 'string'],
             'remarks' => ['nullable', 'string'],
-            'latitude' => ['nullable', 'numeric'],
-            'longitude' => ['nullable', 'numeric'],
         ]);
 
         $allowedStatuses = [
@@ -53,8 +88,6 @@ class OrderController extends Controller
             'status' => $request->status,
             'shopper_id' => auth()->id(),
             'remarks' => $request->remarks,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
         ]);
 
         OrderStatusLog::create([

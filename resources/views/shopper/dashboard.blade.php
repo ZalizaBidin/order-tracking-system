@@ -1,15 +1,25 @@
 @extends('layouts.app-custom')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
         <h3 class="fw-bold mb-1">Personal Shopper Dashboard</h3>
-        <p class="text-muted mb-0">Monitor all customer orders and productivity.</p>
+        <p class="text-muted mb-0">Manage stock items and monitor customer orders.</p>
     </div>
 
-    <a href="{{ route('shopper.orders.index') }}" class="btn btn-primary">
-        <i class="bi bi-bag me-1"></i> View Orders
-    </a>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <a href="{{ route('shopper.stocks.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add New Stock
+        </a>
+
+        <a href="{{ route('shopper.stocks.index') }}" class="btn btn-outline-primary">
+            <i class="bi bi-box-seam me-1"></i> Manage Stock
+        </a>
+
+        <a href="{{ route('shopper.orders.index') }}" class="btn btn-outline-dark">
+            <i class="bi bi-list-ul me-1"></i> View Customer Orders
+        </a>
+    </div>
 </div>
 
 <div class="row g-3 mb-4">
@@ -93,7 +103,7 @@
                         <td>@include('partials.status-badge', ['status' => $order->status])</td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
                         <td class="text-end">
-                            <a href="{{ route('shopper.orders.show', [encrypt($order)]) }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('shopper.orders.show', ['id' => encrypt($order->id)]) }}" class="btn btn-sm btn-primary">
                                 Manage
                             </a>
                         </td>

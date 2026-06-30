@@ -8,7 +8,7 @@
     </div>
 
     <a href="{{ route('customer.orders.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i> New Order
+        <i class="bi bi-box-seam me-1"></i> Order From Stock
     </a>
 </div>
 
@@ -57,7 +57,7 @@
 <div class="card">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0 fw-bold">Recent Orders</h5>
-        <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-primary btn-sm">View All</a>
+        <a href="" class="btn btn-outline-primary btn-sm">View All</a>
     </div>
 
     <div class="card-body">
@@ -81,7 +81,7 @@
                         <td>@include('partials.status-badge', ['status' => $order->status])</td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
                         <td class="text-end">
-                            <a href="{{ route('customer.orders.show', $order) }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('customer.orders.show',['order' => encrypt($order->id)]) }}" class="btn btn-sm btn-primary">
                                 View
                             </a>
                         </td>
