@@ -21,4 +21,4 @@ RUN php artisan view:clear || true
 EXPOSE 80
 
 # CMD php artisan migrate --force || true && supervisord
-CMD php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan migrate --force && php artisan db:seed --force && supervisord
+CMD php artisan optimize:clear && php artisan migrate --force
