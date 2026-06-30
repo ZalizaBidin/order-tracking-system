@@ -20,4 +20,4 @@ RUN php artisan view:clear || true
 
 EXPOSE 80
 
-CMD php artisan migrate --force || true && /entrypoint supervisord
+CMD php artisan migrate --force || true && supervisord
