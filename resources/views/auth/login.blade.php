@@ -300,14 +300,6 @@
                                 </div>
 
                                 <div class="feature-item">
-                                    <div class="icon"><i class="bi bi-wifi-off"></i></div>
-                                    <div>
-                                        <h6>PWA Support</h6>
-                                        <p>Installable web application with offline fallback support.</p>
-                                    </div>
-                                </div>
-
-                                <div class="feature-item">
                                     <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
                                     <div>
                                         <h6>Progress Monitoring</h6>
