@@ -13,18 +13,43 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             background: #f5f7fb;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #212529;
         }
 
         .app-navbar {
             background: linear-gradient(135deg, #0d6efd, #084298);
         }
 
+        .navbar-brand {
+            font-size: 1.1rem;
+        }
+
         .card {
             border: 0;
             border-radius: 16px;
             box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .form-control,
+        .form-select,
+        .btn {
+            border-radius: 10px;
+        }
+
+        .status-badge {
+            font-size: 12px;
+            padding: 7px 10px;
+            border-radius: 999px;
         }
 
         .summary-card {
@@ -39,12 +64,6 @@
             position: absolute;
             right: 18px;
             top: 18px;
-        }
-
-        .status-badge {
-            font-size: 12px;
-            padding: 7px 10px;
-            border-radius: 999px;
         }
 
         .timeline {
@@ -73,8 +92,36 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
             .desktop-sidebar {
                 display: none;
+            }
+
+            .navbar .container {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .navbar-collapse {
+                margin-top: 12px;
+            }
+
+            .navbar-nav {
+                gap: 8px;
+            }
+
+            .navbar-nav .nav-link {
+                padding-left: 0;
+                color: rgba(255, 255, 255, .9);
+            }
+
+            main {
+                padding-bottom: 90px;
             }
 
             .bottom-nav {
@@ -83,15 +130,17 @@
                 bottom: 0;
                 left: 0;
                 right: 0;
-                background: white;
+                background: #ffffff;
                 border-top: 1px solid #dee2e6;
-                z-index: 1000;
+                z-index: 1050;
+                padding-bottom: env(safe-area-inset-bottom);
+                box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.08);
             }
 
             .bottom-nav a {
                 flex: 1;
                 text-align: center;
-                padding: 9px 4px;
+                padding: 10px 4px;
                 text-decoration: none;
                 color: #6c757d;
                 font-size: 12px;
@@ -100,47 +149,49 @@
             .bottom-nav a i {
                 display: block;
                 font-size: 20px;
-            }
-
-            main {
-                padding-bottom: 80px;
+                margin-bottom: 2px;
             }
         }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark app-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark app-navbar shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">
                 <i class="bi bi-bag-check-fill me-1"></i> OrderTrack
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar">
+            @auth
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar"
+                aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            @endauth
 
+            @auth
             <div class="collapse navbar-collapse" id="topNavbar">
                 <ul class="navbar-nav ms-auto align-items-lg-center">
                     <li class="nav-item">
                         <span class="nav-link">
                             {{ auth()->user()->name ?? '' }}
-                            @auth
-                            <span class="badge bg-light text-primary ms-1">{{ ucfirst(auth()->user()->role) }}</span>
-                            @endauth
+                            <span class="badge bg-light text-primary ms-1">
+                                {{ ucfirst(auth()->user()->role) }}
+                            </span>
                         </span>
                     </li>
 
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button class="btn btn-light btn-sm">
-                                <i class="bi bi-box-arrow-right"></i> Logout
+                            <button type="submit" class="btn btn-light btn-sm">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
                             </button>
                         </form>
                     </li>
                 </ul>
             </div>
+            @endauth
         </div>
     </nav>
 
@@ -166,22 +217,27 @@
     @if(auth()->user()->role === 'customer')
     <div class="bottom-nav">
         <a href="{{ route('customer.dashboard') }}">
-            <i class="bi bi-house"></i> Home
+            <i class="bi bi-house"></i>
+            Home
         </a>
         <a href="{{ route('customer.orders.index') }}">
-            <i class="bi bi-list-check"></i> Orders
+            <i class="bi bi-list-check"></i>
+            Orders
         </a>
         <a href="{{ route('customer.orders.create') }}">
-            <i class="bi bi-plus-circle"></i> Create
+            <i class="bi bi-plus-circle"></i>
+            Create
         </a>
     </div>
     @else
     <div class="bottom-nav">
         <a href="{{ route('shopper.dashboard') }}">
-            <i class="bi bi-speedometer2"></i> Home
+            <i class="bi bi-speedometer2"></i>
+            Home
         </a>
         <a href="{{ route('shopper.orders.index') }}">
-            <i class="bi bi-bag"></i> Orders
+            <i class="bi bi-bag"></i>
+            Orders
         </a>
     </div>
     @endif
@@ -195,7 +251,7 @@
         Swal.fire({
             icon: 'success',
             title: 'Success',
-            text: "{{ session('success') }}",
+            text: @json(session('success')),
             showConfirmButton: false,
             timer: 1800,
             timerProgressBar: true
@@ -208,7 +264,7 @@
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: "{{ session('error') }}",
+            text: @json(session('error')),
             confirmButtonText: 'OK'
         });
     </script>
@@ -218,13 +274,11 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
+            navigator.serviceWorker.register('/service-worker.js?v=2')
                 .then(() => console.log('Service Worker registered'))
                 .catch(error => console.log('Service Worker failed:', error));
         }
     </script>
-
-    @stack('scripts')
 </body>
 
 </html>

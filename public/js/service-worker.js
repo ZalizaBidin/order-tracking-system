@@ -1,55 +1,43 @@
-const CACHE_NAME = 'ordertrack-pwa-v1';
+const CACHE_NAME = 'ordertrack-cache-v2';
 
 const urlsToCache = [
     '/',
-    '/login',
-    '/dashboard',
-    '/offline.html',
     '/manifest.json'
 ];
 
-self.addEventListener('install', function (event) {
+self.addEventListener('install', event => {
+    self.skipWaiting();
+
     event.waitUntil(
-        caches.open(CACHE_NAME).then(function (cache) {
+        caches.open(CACHE_NAME).then(cache => {
             return cache.addAll(urlsToCache);
         })
     );
 });
 
-self.addEventListener('activate', function (event) {
+self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(function (cacheNames) {
+        caches.keys().then(cacheNames => {
             return Promise.all(
-                cacheNames.map(function (cacheName) {
+                cacheNames.map(cacheName => {
                     if (cacheName !== CACHE_NAME) {
                         return caches.delete(cacheName);
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
-self.addEventListener('fetch', function (event) {
-    if (event.request.method !== 'GET') {
+self.addEventListener('fetch', event => {
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).catch(() => caches.match('/'))
+        );
         return;
     }
 
     event.respondWith(
-        fetch(event.request)
-            .then(function (response) {
-                const responseClone = response.clone();
-
-                caches.open(CACHE_NAME).then(function (cache) {
-                    cache.put(event.request, responseClone);
-                });
-
-                return response;
-            })
-            .catch(function () {
-                return caches.match(event.request).then(function (response) {
-                    return response || caches.match('/offline.html');
-                });
-            })
+        fetch(event.request).catch(() => caches.match(event.request))
     );
 });
