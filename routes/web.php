@@ -76,6 +76,12 @@ Route::middleware(['auth', 'role:shopper'])
 
         // Stock management by shopper
         Route::resource('stocks', StockController::class);
+
+        Route::post('stocks/import', [StockController::class, 'import'])
+            ->name('stocks.import');
+
+        Route::get('stocks/template/download', [StockController::class, 'downloadTemplate'])
+            ->name('stocks.template.download');
     });
 
 Route::middleware('auth')->group(function () {

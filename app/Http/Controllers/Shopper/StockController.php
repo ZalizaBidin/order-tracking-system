@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Shopper;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
+use App\Imports\StocksImport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\StockTemplateExport;
 
 class StockController extends Controller
 {
@@ -23,12 +26,12 @@ class StockController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'item_name' => ['required', 'string', 'max:255'],
+            'item_name'   => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'price' => ['nullable', 'numeric', 'min:0'],
-            'quantity' => ['required', 'integer', 'min:0'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'status' => ['required', 'in:Available,Unavailable'],
+            'price'       => ['nullable', 'numeric', 'min:0'],
+            'quantity'    => ['required', 'integer', 'min:0'],
+            'status'      => ['required', 'in:Available,Unavailable'],
+            'image'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $imagePath = null;
@@ -38,63 +41,40 @@ class StockController extends Controller
         }
 
         Stock::create([
-            'item_name' => $request->item_name,
+            'item_name'   => $request->item_name,
             'description' => $request->description,
-            'price' => $request->price,
-            'quantity' => $request->quantity,
-            'image' => $imagePath,
-            'status' => $request->status,
+            'price'       => $request->price ?? 0,
+            'quantity'    => $request->quantity,
+            'status'      => $request->status,
+            'image'       => $imagePath,
         ]);
 
         return redirect()
             ->route('shopper.stocks.index')
-            ->with('success', 'Stock item created successfully.');
+            ->with('success', 'Stock created successfully.');
     }
 
-    public function edit(Stock $stock)
-    {
-        return view('shopper.stocks.edit', compact('stock'));
-    }
-
-    public function update(Request $request, Stock $stock)
+    public function import(Request $request)
     {
         $request->validate([
-            'item_name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'price' => ['nullable', 'numeric', 'min:0'],
-            'quantity' => ['required', 'integer', 'min:0'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-            'status' => ['required', 'in:Available,Unavailable'],
+            'excel_file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120'],
         ]);
 
-        $imagePath = $stock->image;
+        try {
+            Excel::import(new StocksImport, $request->file('excel_file'));
 
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('stocks', 'public');
+            return redirect()
+                ->route('shopper.stocks.index')
+                ->with('success', 'Stocks imported successfully.');
+        } catch (\Throwable $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to import Excel file. Please check your file format and data.');
         }
-
-        $stock->update([
-            'item_name' => $request->item_name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'quantity' => $request->quantity,
-            'image' => $imagePath,
-            'status' => $request->status,
-        ]);
-
-        return redirect()
-            ->route('shopper.stocks.index')
-            ->with('success', 'Stock updated successfully.');
     }
 
-    public function destroy(Stock $stock)
+    public function downloadTemplate()
     {
-        $stock->delete();
-
-        return redirect()
-            ->route('shopper.stocks.index')
-            ->with('success', 'Stock deleted successfully.');
+        return Excel::download(new StockTemplateExport, 'stock_import_template.xlsx');
     }
-
-   
 }
